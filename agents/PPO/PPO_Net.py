@@ -35,13 +35,14 @@ class PolicyNet(torch.nn.Module):
 
     # 第一个动作范围是-100,200
     # 第二个动作范围是-30，30
+    #tanh将神经网络的输出限制到[-1,1]
     def forward(self, x):
         x=self.conv(x)
         x=torch.flatten(x,start_dim=1)
         x=self.fc(x)
         x=torch.tanh(x)
         m = torch.tensor([50, 0]).to(device)
-        t = torch.tensor([150, 50]).to(device)
+        t = torch.tensor([150, 30]).to(device)
         return x*t+m
 
 
@@ -85,7 +86,5 @@ if __name__ == '__main__':
     # 第二个动作范围是-30，30
     x=torch.randint(high=100,low=0,size=(1280,1,40,40)).to(device)
     x=x.float()
-
     print(x)
-
     print(s(x))

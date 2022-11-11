@@ -45,12 +45,13 @@ def get_players_and_action_space_list(g):
 
         action_space_list = [g.get_single_action_space(player_id) for player_id in players_id_list]
         actions_space.append(action_space_list)
+    #Box(low=-100, high=200.0, shape=(1,), dtype=np.float32)
+    #Box(low=-30, high=30.0, shape=(1,), dtype=np.float32)
     #print(actions_space)
     return players_id, actions_space
 
 
 def get_joint_action_eval(game, multi_part_agent_ids, policy_list, actions_spaces, all_observes):
-    #print(multi_part_agent_ids[0])
     if len(policy_list) != len(game.agent_nums):
         error = "模型个数%d与玩家个数%d维度不正确！" % (len(policy_list), len(game.agent_nums))
         raise Exception(error)
@@ -64,13 +65,11 @@ def get_joint_action_eval(game, multi_part_agent_ids, policy_list, actions_space
             raise Exception("可选obs类型：%s" % str(obs_type))
 
         agents_id_list = multi_part_agent_ids[policy_i]
-        #print(multi_part_agent_ids)
+
         action_space_list = actions_spaces[policy_i]
-        #print(action_space_list)
         #第一个动作范围是-100,200
         #第二个动作范围是-30，30
         function_name = 'm%d' % policy_i
-        #print(function_name)
         for i in range(len(agents_id_list)):
             agent_id = agents_id_list[i]
             a_obs = all_observes[agent_id]
