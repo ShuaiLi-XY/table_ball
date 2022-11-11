@@ -45,7 +45,7 @@ def get_players_and_action_space_list(g):
 
         action_space_list = [g.get_single_action_space(player_id) for player_id in players_id_list]
         actions_space.append(action_space_list)
-
+    #print(actions_space)
     return players_id, actions_space
 
 
@@ -64,7 +64,11 @@ def get_joint_action_eval(game, multi_part_agent_ids, policy_list, actions_space
             raise Exception("可选obs类型：%s" % str(obs_type))
 
         agents_id_list = multi_part_agent_ids[policy_i]
+        #print(multi_part_agent_ids)
         action_space_list = actions_spaces[policy_i]
+        #print(action_space_list)
+        #第一个动作范围是-100,200
+        #第二个动作范围是-30，30
         function_name = 'm%d' % policy_i
         #print(function_name)
         for i in range(len(agents_id_list)):
@@ -95,7 +99,7 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
 
     logger = get_logger(log_path, g.game_name, json_file=render_mode)
     set_seed(g, env_name)
-
+    #从这里导入agent的文件
     for i in range(len(policy_list)):
         if policy_list[i] not in get_valid_agents():
             raise Exception("agent {} not valid!".format(policy_list[i]))
@@ -109,6 +113,7 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
         import_name = "my_controller"
         import_s = "from %s import %s as %s" % (import_path, import_name, function_name)
         print(import_s)
+        #在这里执行
         exec(import_s, globals())
 
     st = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -130,7 +135,6 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
         step = "step%d" % g.step_cnt
         if g.step_cnt % 10 == 0:
             print(step)
-
         if render_mode and hasattr(g, "env_core"):
             if hasattr(g.env_core, "render"):
                 g.env_core.render()
@@ -166,7 +170,6 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
 #读取agent文件夹下的具体agent目录
 def get_valid_agents():
     dir_path = os.path.join(os.path.dirname(__file__), 'agents')
-
     return [f for f in os.listdir(dir_path) if f != "__pycache__"]
 
 
