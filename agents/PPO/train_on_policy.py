@@ -47,7 +47,7 @@ def get_players_and_action_space_list(g):
         actions_space.append(action_space_list)
     #Box(low=-100, high=200.0, shape=(1,), dtype=np.float32)
     #Box(low=-30, high=30.0, shape=(1,), dtype=np.float32)
-
+    #print(actions_space)
     return players_id, actions_space
 
 
@@ -111,7 +111,7 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
         function_name = 'm%d' % i
         import_name = "my_controller"
         import_s = "from %s import %s as %s" % (import_path, import_name, function_name)
-        #print(import_s)
+        print(import_s)
         #在这里执行
         exec(import_s, globals())
 
@@ -140,11 +140,14 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, ren
         info_dict = {"time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}
         #一个agent的动作空间是两个连续动作空间 分别是朝向和动力 连续变量
         joint_act = get_joint_action_eval(g, multi_part_agent_ids, policy_list, actions_spaces, all_observes)
+        #print(joint_act)
         #done判断游戏是否结束
         #info_before表示了过去两个agent的动作
         #info after中有3个key 分别是agent_position、agent_direction和agent_energy agent_position表示了两个agent的位置和球的位置
         #agent_direction 表示了agent和球的朝向
         all_observes, reward, done, info_before, info_after = g.step(joint_act)
+        #print(all_observes[0])
+        #print(info_after)
         if env_name.split("-")[0] in ["magent"]:
             info_dict["joint_action"] = g.decode(joint_act)
         if info_before:
@@ -169,6 +172,12 @@ def get_valid_agents():
     return [f for f in os.listdir(dir_path) if f != "__pycache__"]
 
 
+def train_on_policy(args):
+    env_type = "olympics-tablehockey"
+    game = make(env_type, seed=None)
+    render_mode = True
+    multi_part_agent_ids, actions_space = get_players_and_action_space_list(game)
+    run_game(game, env_type, multi_part_agent_ids, actions_space, policy_list, render_mode)
 if __name__ == "__main__":
 
     env_type = "olympics-tablehockey"

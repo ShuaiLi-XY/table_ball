@@ -1,18 +1,24 @@
 import random
 import torch
-from PPO_Net import Actor_Net as PolicyNet, Critic_Net as ValueNet
+from PPO_Net import PolicyNet as PolicyNet,ValueNet as ValueNet
 import rl_utils
 import numpy as np
 import torch.nn.functional as F
 
 
-class PPO:
+def my_controller(observation, agent, is_act_continuous=False, ):
+    agent_action = []
+    action=agent.step(observation['obs']['agent_obs'])
+    return action
+
+
+class Agent:
     ''' PPO算法,采用截断方式 '''
 
     def __init__(self, actor_lr, critic_lr,
                  lmbda, epochs, eps, gamma):
         device = torch.device("cuda:0")
-        self.actor = PolicyNet().to(device)
+        self.actor = PolicyNet(2).to(device)
         self.critic = ValueNet().to(device)
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(),
                                                 lr=actor_lr)
@@ -23,7 +29,8 @@ class PPO:
         self.epochs = epochs  # 一条序列的数据用来训练轮数
         self.eps = eps  # PPO中截断范围的参数
         self.device = device
-        self.exp=0.1
+        self.exp = 0.1
+
     def train(self):
         self.actor.train()
         self.critic.train()
@@ -32,33 +39,21 @@ class PPO:
         self.actor.eval()
         self.critic.eval()
 
-    def step(self, state, valid_action):
+    def step(self, state):
+        print(state.shape)
         state = torch.tensor(np.array([state]), dtype=torch.float).to(self.device)
         state = torch.unsqueeze(state, dim=1)
-        probs = self.actor(state)
-        for i in range(4):
-            if valid_action[i] != 0:
-                probs[0][i] = 0
-        action_dist = torch.distributions.Categorical(probs)
-        action = action_dist.sample()
-        return action.item()
-    #predict时调用这个方法
-    def step_predict(self, state, valid_action):
-        state = torch.tensor(np.array([state]), dtype=torch.float).to(self.device)
-        state = torch.unsqueeze(state, dim=1)
-        probs = self.actor(state)
-        for i in range(4):
-            if valid_action[i] != 0:
-                probs[0][i] = 0
-        action=probs.argmax()
-        return action.item()
+        action = self.actor(state)
+        return action
+
+    # predict时调用这个方法
 
     def save_weight(self, epoch):
         torch.save(self.actor.state_dict(), './save_weight/actor_net{}.pth'.format(epoch))
         torch.save(self.critic.state_dict(), './save_weight/critic_net{}.pth'.format(epoch))
 
     def load_weight(self, epoch):
-        print('开始训练{}'.format(epoch))
+        # print('开始训练{}'.format(epoch))
         self.actor.load_state_dict(torch.load('./save_weight/actor_net{}.pth'.format(epoch)))
         self.critic.load_state_dict(torch.load('./save_weight/critic_net{}.pth'.format(epoch)))
 
@@ -100,7 +95,9 @@ class PPO:
             self.actor_optimizer.step()
             self.critic_optimizer.step()
 
-
         return c_loss / self.epochs, a_loss / self.epochs
 
-
+if __name__ == '__main__':
+    agent=Agent(0,0,0,0,0,0)
+    observation={'obs': {'agent_obs': np.random.rand(40,40), 'id': 'team_1'}, 'controlled_player_index': 1}
+    print(my_controller(observation,agent))

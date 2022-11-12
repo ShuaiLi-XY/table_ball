@@ -13,9 +13,12 @@ https://github.com/jidiai/ai_lib/blob/master/examples/demo
 
 def my_controller(observation, action_space, is_act_continuous=False):
     agent_action = []
+    print(observation)
+    print(action_space)
     for i in range(len(action_space)):
         action_ = sample_single_dim(action_space[i], is_act_continuous)
         agent_action.append(action_)
+    print(agent_action)
     return agent_action
 
 
